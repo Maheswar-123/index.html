@@ -3,70 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kids Racing Game</title>
+    <title>Neon Racing</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #87CEEB; /* Sky blue background */
+            background-color: #050510; /* Deep dark space background */
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: Arial, sans-serif;
-            touch-action: none; /* Prevents accidental zooming/scrolling on mobile */
+            font-family: 'Courier New', Courier, monospace;
+            touch-action: none;
+            color: #0ff; /* Neon cyan text */
         }
         #gameArea {
             position: relative;
             margin-top: 20px;
         }
         canvas {
-            background-color: #555; /* Dark gray road */
-            border: 5px solid #fff;
+            background-color: #0a0a1a;
+            border: 2px solid #e91e63; /* Neon magenta border */
             border-radius: 10px;
-            box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0px 0px 20px #e91e63;
         }
         .score-board {
-            color: #333;
             font-size: 24px;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 15px;
+            text-shadow: 0px 0px 10px #0ff; /* Glowing text */
         }
         .controls {
             display: flex;
             gap: 20px;
-            margin-top: 15px;
+            margin-top: 20px;
             width: 300px;
             justify-content: space-between;
         }
         button {
-            padding: 20px 30px;
+            padding: 15px 30px;
             font-size: 20px;
             font-weight: bold;
-            border-radius: 15px;
-            border: none;
-            background-color: #FF4500; /* Bright orange buttons */
-            color: white;
+            border-radius: 10px;
+            border: 2px solid #0ff;
+            background-color: transparent;
+            color: #0ff;
             flex-grow: 1;
             cursor: pointer;
-            box-shadow: 0px 4px 0px #CC3700;
+            box-shadow: 0px 0px 15px #0ff inset, 0px 0px 15px #0ff;
+            text-transform: uppercase;
         }
         button:active {
-            transform: translateY(4px);
-            box-shadow: 0px 0px 0px #CC3700;
+            background-color: #0ff;
+            color: #000;
         }
     </style>
 </head>
 <body>
 
-    <div class="score-board">Score: <span id="score">0</span></div>
+    <div class="score-board">SCORE: <span id="score">0</span></div>
     
     <div id="gameArea">
         <canvas id="gameCanvas" width="300" height="450"></canvas>
     </div>
 
     <div class="controls">
-        <button id="leftBtn">LEFT</button>
-        <button id="rightBtn">RIGHT</button>
+        <button id="leftBtn">&lt; LEFT</button>
+        <button id="rightBtn">RIGHT &gt;</button>
     </div>
 
     <script>
@@ -74,41 +76,33 @@
         const ctx = canvas.getContext("2d");
         const scoreElement = document.getElementById("score");
 
-        // Player car settings
-        let car = { x: 130, y: 360, width: 40, height: 70, speed: 25 };
+        let car = { x: 130, y: 360, width: 40, height: 60, speed: 25 };
         let obstacles = [];
         let score = 0;
         let gameFrames = 0;
         let gameOver = false;
 
-        // Function to draw cars
-        function drawCar(x, y, color) {
+        // Function to draw glowing objects
+        function drawNeonRect(x, y, w, h, color, glowColor) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = glowColor;
             ctx.fillStyle = color;
-            ctx.fillRect(x, y, 40, 70); // Main body
-            ctx.fillStyle = "black";
-            ctx.fillRect(x - 5, y + 10, 5, 15);  // Top-left wheel
-            ctx.fillRect(x + 40, y + 10, 5, 15); // Top-right wheel
-            ctx.fillRect(x - 5, y + 45, 5, 15);  // Bottom-left wheel
-            ctx.fillRect(x + 40, y + 45, 5, 15); // Bottom-right wheel
+            ctx.fillRect(x, y, w, h);
+            ctx.shadowBlur = 0; // reset for performance
         }
 
-        // Movement logic
         function moveLeft() { if (!gameOver && car.x > 10) car.x -= car.speed; }
         function moveRight() { if (!gameOver && car.x < canvas.width - car.width - 10) car.x += car.speed; }
 
-        // Touch & Click Event Listeners
         document.getElementById("leftBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveLeft(); });
         document.getElementById("rightBtn").addEventListener("touchstart", (e) => { e.preventDefault(); moveRight(); });
         document.getElementById("leftBtn").addEventListener("mousedown", moveLeft);
         document.getElementById("rightBtn").addEventListener("mousedown", moveRight);
-
-        // Keyboard support for computer testing
         window.addEventListener("keydown", (e) => {
             if (e.key === "ArrowLeft") moveLeft();
             if (e.key === "ArrowRight") moveRight();
         });
 
-        // Restart game logic
         canvas.addEventListener("click", () => {
             if (gameOver) {
                 gameOver = false;
@@ -122,49 +116,62 @@
 
         function gameLoop() {
             if (gameOver) {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = "white";
-                ctx.font = "30px Arial";
-                ctx.fillText("Game Over!", 65, 200);
-                ctx.font = "20px Arial";
-                ctx.fillText("Tap screen to restart", 55, 240);
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = "#e91e63";
+                ctx.fillStyle = "#e91e63";
+                ctx.font = "30px 'Courier New'";
+                ctx.fillText("SYSTEM FAILURE", 25, 200);
+                ctx.shadowColor = "#0ff";
+                ctx.fillStyle = "#0ff";
+                ctx.font = "16px 'Courier New'";
+                ctx.fillText("TAP SCREEN TO REBOOT", 50, 240);
+                ctx.shadowBlur = 0;
                 return;
             }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Animate the white road lines
-            ctx.fillStyle = "white";
-            for (let i = 0; i < 5; i++) {
-                let lineY = (gameFrames * 3 + i * 120) % 550 - 100;
-                ctx.fillRect(145, lineY, 10, 60);
+            // Draw moving neon grid lines (Road)
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.2)";
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                let lineY = (gameFrames * 4 + i * 100) % 600 - 100;
+                ctx.beginPath();
+                ctx.moveTo(0, lineY);
+                ctx.lineTo(canvas.width, lineY);
+                ctx.stroke();
             }
 
-            // Draw player (Blue car)
-            drawCar(car.x, car.y, "#1E90FF");
+            // Draw player (Cyan Neon Car)
+            drawNeonRect(car.x, car.y, car.width, car.height, "#0ff", "#0ff");
+            // Car detail line
+            ctx.fillStyle = "#000";
+            ctx.fillRect(car.x + 10, car.y + 10, 20, 40);
 
-            // Generate new obstacles randomly
-            if (gameFrames % 80 === 0) {
+            // Generate obstacles
+            if (gameFrames % 70 === 0) {
                 let lanes = [30, 130, 230];
                 let randomLane = lanes[Math.floor(Math.random() * lanes.length)];
-                obstacles.push({ x: randomLane, y: -80, width: 40, height: 70, speed: 3 + Math.random() * 2 });
+                obstacles.push({ x: randomLane, y: -80, width: 40, height: 60, speed: 4 + Math.random() * 3 });
             }
 
-            // Move and draw obstacles (Red cars)
+            // Move and draw obstacles (Magenta Neon Cars)
             for (let i = 0; i < obstacles.length; i++) {
                 let obs = obstacles[i];
                 obs.y += obs.speed;
-                drawCar(obs.x, obs.y, "#FF0000");
+                
+                drawNeonRect(obs.x, obs.y, obs.width, obs.height, "#e91e63", "#e91e63");
+                ctx.fillStyle = "#000";
+                ctx.fillRect(obs.x + 10, obs.y + 10, 20, 40);
 
-                // Check for crash
                 if (car.x < obs.x + obs.width && car.x + car.width > obs.x &&
                     car.y < obs.y + obs.height && car.y + car.height > obs.y) {
                     gameOver = true;
                 }
             }
 
-            // Track score for cars successfully dodged
             obstacles.forEach(obs => {
                 if (obs.y > canvas.height && !obs.passed) {
                     obs.passed = true;
@@ -172,7 +179,6 @@
                 }
             });
             
-            // Clean up memory
             obstacles = obstacles.filter(obs => obs.y < canvas.height + 100);
             
             scoreElement.innerText = score;
